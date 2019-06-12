@@ -1,7 +1,3 @@
-#!/usr/share/rvm/rubies/ruby-2.6.3/bin/ruby
-
-require 'byebug'
-
 module SublimeCheckout
   autoload :GitCmd, './sublime_checkout/git_cmd'
   autoload :ShCmd, './sublime_checkout/sh_cmd'
