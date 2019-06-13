@@ -7,14 +7,11 @@ module SublimeCheckout
     end
 
     def self.cmd(command)
-      @output = `#{command}`
-      return false if $CHILD_STATUS.nil?
-
-      $CHILD_STATUS.to_i.zero? ? true : false
+      system(command)
     end
 
     def self.cmd_output(command)
-      `#{command}`.chomp
+      %x{#{command}}.chomp
     end
   end
 end

@@ -2,25 +2,34 @@ require 'fileutils'
 
 module SublimeCheckout
   class Workspace
-    attr_reader :project, :branch
+    attr_reader :project
 
     def initialize(project, branch)
       @project = project
       @branch = branch
-      checkout(branch)
       create_workspace
     end
 
-    def checkout(branch)
+    def checkout(to_branch)
+      @branch = to_branch
+      create_workspace
       GitCmd.checkout(branch) || GitCmd.checkout_new(branch)
     end
 
+    def branch
+      (@branch.nil? || @branch == '') ? project.branch : @branch
+    end
+
     def file
-      "#{@branch}.sublime-workspace"
+      "#{branch}.sublime-workspace"
     end
 
     def project_file_path
       File.join(Projects.path, project.name, project.file)
+    end
+
+    def branch_project_path
+      File.join(Projects.path, project.name, "#{branch}.sublime-project")
     end
 
     def file_path
@@ -37,11 +46,13 @@ module SublimeCheckout
 
     private
 
-    def create_workspace
-      FileUtils.mkdir_p(file_directory)
-      FileUtils.symlink(project.file_path, project_file_path) unless File.exist?(project_file_path)
-      return unless File.exist?(project.workspace_file_path)
-      FileUtils.cp(project.workspace_file_path, file_path)
-    end
+      def create_workspace
+        FileUtils.mkdir_p(file_directory)
+        FileUtils.symlink(project.file_path, branch_project_path) unless File.exist?(branch_project_path)
+        FileUtils.symlink(project.file_path, project_file_path) unless File.exist?(project_file_path)
+        return unless File.exist?(project.workspace_file_path)
+
+        FileUtils.cp(project.workspace_file_path, file_path)
+      end
   end
 end

@@ -18,7 +18,7 @@ module SublimeCheckout
     end
 
     def workspace_path
-      workspace.exists? ? workspace.file_path : file_path
+      workspace.branch_project_path
     end
 
     def workspace_file
@@ -38,14 +38,13 @@ module SublimeCheckout
     end
 
     def checkout(branch)
-      @workspace = Workspace.new(self, branch)
+      @workspace.checkout(branch)
     end
 
     private
 
       def create_project
         create_project_file
-        # create_workspace_file
       end
 
       def create_project_file
@@ -56,16 +55,6 @@ module SublimeCheckout
               [{
                 "path": "#{path}"
               }]
-            }
-          FILE
-        end
-      end
-
-      def create_workspace_file
-        File.open(workspace_file_path, 'w') do |file|
-          file.write <<~FILE
-            {
-              "project": "#{file_path}"
             }
           FILE
         end

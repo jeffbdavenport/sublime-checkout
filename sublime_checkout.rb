@@ -1,10 +1,11 @@
-module SublimeCheckout
-  autoload :GitCmd, './sublime_checkout/git_cmd'
-  autoload :ShCmd, './sublime_checkout/sh_cmd'
-  autoload :Projects, './sublime_checkout/projects'
-  autoload :Project, './sublime_checkout/project'
-  autoload :Workspace, './sublime_checkout/workspace'
+require 'fileutils'
+require_relative 'sublime_checkout/git_cmd'
+require_relative 'sublime_checkout/sh_cmd'
+require_relative 'sublime_checkout/projects'
+require_relative 'sublime_checkout/project'
+require_relative 'sublime_checkout/workspace'
 
+module SublimeCheckout
   def self.sublime_checkout(branch)
     path = "#{ENV['HOME']}/.config/sublime-text-3".freeze
     unless File.exist?(File.join(path, Projects::USER_PATH))
@@ -14,8 +15,11 @@ module SublimeCheckout
     Projects.initialize(path)
     @project ||= Project.new(Dir.pwd)
     @project.checkout(branch)
-    ShCmd.cmd("subl -a #{@project.workspace_path}")
+    # We need to run the command twice to save the new workspace
+    ShCmd.cmd("subl --project #{@project.workspace_path} -a")
+    sleep 0.1
+    ShCmd.cmd("subl --project #{@project.workspace_path} -a")
   end
 end
 
-SublimeCheckout.sublime_checkout(ARGV.first)
+SublimeCheckout.sublime_checkout(*ARGV)
